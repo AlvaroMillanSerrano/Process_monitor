@@ -1,6 +1,7 @@
 import os
 import sys
 import psutil
+import time
 
 def detect_os() -> str:
     system = sys.platform
@@ -11,6 +12,11 @@ def detect_os() -> str:
 def list_process():
     print(f"{'PID':<10} {'Name':<35} {'User':<20} {'CPU (%)':<10} {'Memory (%)':<10}")
     print("-" * 85)
+
+    for proc in psutil.process_iter(['cpu_percent']):
+        try: proc.info['cpu_percent']
+        except: pass
+    time.sleep(0.1)
     
     for proc in psutil.process_iter(['pid', 'name', 'username', 'cpu_percent', 'memory_percent']):
         try:
@@ -38,12 +44,17 @@ def search_process(p_name):
 
 def analyze_sus(so):
     p_anomalies = False
-
     print("\n[?] Analyzing possible anomalies...")
+
+    for proc in psutil.process_iter(['cpu_percent']):
+        try: proc.info['cpu_percent']
+        except: pass
+    time.sleep(0.1)
     
     sus_names = ["miner", "crypto", "exploit", "hack", "keylogger"]
     sus_routes_win = ["\\appdata\\local\\temp", "\\users\\public"]
     sus_routes_lin = ["/tmp", "/dev/shm", "/var/tmp"]
+    critical_win_procs = ["svchost.exe", "lsass.exe", "services.exe", "lsm.exe", "csrss.exe"]
 
     for proc in psutil.process_iter(['pid', 'name', 'exe', 'cpu_percent']):
         try:
@@ -64,6 +75,11 @@ def analyze_sus(so):
                 if any(sus_route in route.lower() for sus_route in sus_routes_win):
                     print(f"[!]-> ALERT: Process executing from windows temp folder -> PID {pid}: {name} ({route})")
                     p_anomalies = True
+                if name_lower in critical_win_procs and "system32" not in route_lower:
+                    if pid != 4 and route != "":
+                        print(f"[!!!]-> CRITICAL ALERT: Fake System Process! -> PID {pid}: {name} running from {route}")
+                        p_anomalies = True
+    
             elif so.startswith("linux"):
                 if any(sus_route in route.lower() for sus_route in sus_routes_lin):
                     print(f"[!]-> ALERT: Process executing from linux temp folder -> PID {pid}: {name} ({route})")
