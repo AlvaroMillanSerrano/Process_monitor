@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "process-monitor"
+version = "1.0.0"
+description = "Un monitor de procesos interactivo y analizador de anomalías básico."
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    { name = "Alvaro", email = "alvaromillanserrano@gmail.com" }
+]
+keywords = ["monitor", "process", "psutil", "security", "anomalies"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: System :: Monitoring",
+]
+dependencies = [
+    "psutil>=5.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "flake8",
+]
